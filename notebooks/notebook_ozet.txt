@@ -1,0 +1,39 @@
+[0] KOD: (boş hücre)
+[1] KOD: import pandas as pd
+[2] KOD: df_hedef = pd.read_sql('SELECT * FROM hedef', conn)
+[3] KOD: df_hedef['hedef_degisken'] = df_hedef['hedef_degisken'].str.replace(',', '.')
+[4] KOD: plt.figure(figsize=(8, 5))
+[5] MD: Hedef değişken kolonları yani buradaki hedef değişkenimizin anlamı öğrencinin ta
+[6] KOD: from scipy.stats import shapiro
+[7] MD: Bu test, hedef_degisken sütununun normal dağılıma uyup uymadığını ölçüyor.
+[8] KOD: print(f"İstatistik: {stat}, p-değeri: {p}")
+[9] KOD: print(df_hedef['hedef_degisken'].skew())
+[10] MD: Skewness (Çarpıklık) Nedir?
+[11] KOD: print(df_hedef.columns.tolist())
+[12] MD: Bu tablomda (df_hedef) hangi sütunlar var, isimleri söyler
+[13] KOD: print(f"İstatistik: {stat}, p-değeri: {p}")
+[14] KOD: %who DataFrame
+[15] MD: Şu ana kadar oluşturduğum tabloların (DataFrame'lerin) hepsini listeler.
+[16] KOD: """
+[17] KOD: # ============================================
+[18] KOD: # ============================================
+[19] KOD: # ============================================
+[20] MD: Mavi çubuklar histogramımız,kırmızı çizgi ise verimizin şeklini daha net görebil
+[21] KOD: # ============================================
+[22] MD: Korelasyon matrisi nedir ve okuyalım.
+[23] KOD: # ============================================
+[24] MD: Okul Türüne Göre Hedef Değişken Boxplot grafiği,
+[25] MD: ANOVA Testi Ne Yapar?
+[26] KOD: # ============================================
+[27] MD: #1.grafik kolonlara göre eksik veri oranı
+[28] KOD: import os
+[29] MD: BÖLÜM 3
+[30] KOD: # ============================================
+[31] MD: Hipotez: ontest_skoru ile hedef_degisken arasında 0.99 gibi çok yüksek bir korel
+[32] KOD: # ============================================
+[33] MD: Hipotez: Tek tek ders notları yerine, öğrencinin genel akademik performansını te
+[34] MD: ## Eksik Veri Doldurma (AutoML - Iterative Imputer)
+[35] KOD: # İkili (binary, var/yok) sütunlar - 0/1 değer alacaklar
+[36] MD: Sütun tiplerine göre ayırdık.
+[37] MD: AutoML (IterativeImputer / MICE) ile Doldurma
+[38] KOD: import warnings
