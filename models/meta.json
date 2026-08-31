@@ -1,0 +1,63 @@
+{
+  "model_adi": "RandomForest",
+  "surum": "1.0.0",
+  "egitim_tarihi": "2026-08-31",
+  "egitim_satir_sayisi": 999,
+  "doldurma": "SimpleImputer(strategy=\"median\")",
+  "oznitelik_sirasi": [
+    "genel_not_ort",
+    "ebeveyn_egitim_ort",
+    "sayisal_sozel_farki",
+    "aile_geliri_seviyesi",
+    "anne_meslek(var/yok)",
+    "kardes(var/yok)",
+    "dogum_yil",
+    "burslu",
+    "okula_basladigi_yil",
+    "eksik_alan_sayisi"
+  ],
+  "hedef": "hedef_degisken",
+  "turetilmis_oznitelikler": {
+    "genel_not_ort": "alti ders notunun ortalamasi",
+    "ebeveyn_egitim_ort": "(anne_egitim_seviyesi + baba_egitim_seviyesi) / 2",
+    "sayisal_sozel_farki": "ort(matematik, fen) - ort(turkce, sosyal, y_dil, din)",
+    "eksik_alan_sayisi": "aile anketindeki 7 alandan kaci bos birakilmis"
+  },
+  "ders_kolonlari": [
+    "turkce_not_ort",
+    "matematik_not_ort",
+    "fen_not_ort",
+    "sosyal_not_ort",
+    "y_dil_not_ort",
+    "din_not_ort"
+  ],
+  "aile_anketi_kolonlari": [
+    "burslu",
+    "aile_geliri_seviyesi",
+    "kardes(var/yok)",
+    "anne_egitim_seviyesi",
+    "baba_egitim_seviyesi",
+    "anne_meslek(var/yok)",
+    "baba_meslek(var/yok)"
+  ],
+  "okula_basladigi_yil_haritasi": {
+    "2013-2014": 0,
+    "2014-2015": 1,
+    "2015-2016": 2
+  },
+  "dogrulanmis_metrikler": {
+    "aciklama": "kronolojik split, donem 0+1 ile egitim, donem 2 ile test. Asagidaki sayilar TAM OLARAK bu boru hattina ait (RandomForest + medyan doldurma).",
+    "test_ogrenci_sayisi": 108,
+    "rmse": 29.139,
+    "mae": 23.194,
+    "r2": 0.7934,
+    "aptal_referans_rmse": 64.112
+  },
+  "ortam": {
+    "python": "3.14.7",
+    "scikit-learn": "1.9.0",
+    "numpy": "2.5.2",
+    "pandas": "2.3.3",
+    "joblib": "1.5.3"
+  }
+}
