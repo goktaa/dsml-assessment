@@ -1,0 +1,10 @@
+# data/ imaja girmemeli.
+data/
+notebooks/
+reports/
+mlruns/
+.git/
+.vscode/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/

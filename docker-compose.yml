@@ -1,0 +1,13 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    image: ogrenci-skor-api:1.0.0
+    container_name: ogrenci-skor-api
+    ports:
+      - "8000:8000"
+    volumes:
+      # Salt-okunur: servisin modeli degistirmesi gerekmiyor.
+      - ./models:/app/models:ro
+    restart: unless-stopped
