@@ -1,39 +1,186 @@
-[0] KOD: (boş hücre)
-[1] KOD: import pandas as pd
-[2] KOD: df_hedef = pd.read_sql('SELECT * FROM hedef', conn)
-[3] KOD: df_hedef['hedef_degisken'] = df_hedef['hedef_degisken'].str.replace(',', '.')
-[4] KOD: plt.figure(figsize=(8, 5))
-[5] MD: Hedef değişken kolonları yani buradaki hedef değişkenimizin anlamı öğrencinin ta
-[6] KOD: from scipy.stats import shapiro
-[7] MD: Bu test, hedef_degisken sütununun normal dağılıma uyup uymadığını ölçüyor.
-[8] KOD: print(f"İstatistik: {stat}, p-değeri: {p}")
-[9] KOD: print(df_hedef['hedef_degisken'].skew())
-[10] MD: Skewness (Çarpıklık) Nedir?
-[11] KOD: print(df_hedef.columns.tolist())
-[12] MD: Bu tablomda (df_hedef) hangi sütunlar var, isimleri söyler
-[13] KOD: print(f"İstatistik: {stat}, p-değeri: {p}")
-[14] KOD: %who DataFrame
-[15] MD: Şu ana kadar oluşturduğum tabloların (DataFrame'lerin) hepsini listeler.
-[16] KOD: """
+01_explore_data.ipynb - hucre ozeti
+Toplam 183 hucre
+============================================================
+[0] KOD: import sqlite3
+[1] KOD: df_hedef = pd.read_sql('SELECT * FROM hedef', conn)
+[2] KOD: df_hedef['hedef_degisken'] = df_hedef['hedef_degisken'].str.replace(',', '.')
+[3] KOD: plt.figure(figsize=(8, 5))
+[4] MD : Bunlar Hedef Değişken kolonlarımız.
+[5] KOD: from scipy.stats import shapiro
+[6] MD : Bu test, hedef_degisken sütununun normal dağılıma uyup uymadığını ölçüyor.
+[7] KOD: print(f"İstatistik: {stat}, p-değeri: {p}")
+[8] KOD: print(df_hedef['hedef_degisken'].skew())
+[9] MD : **Skewness (Çarpıklık) Nedir?** Skewness, bir verinin dağılımının simetrik olu
+[10] KOD: print(df_hedef.columns.tolist())
+[11] MD : Bu tablomda (df_hedef) hangi sütunlar var, isimleri söyler
+[12] KOD: %who DataFrame
+[13] MD : Şu ana kadar oluşturduğum tabloların (DataFrame'lerin) hepsini listeler.
+[14] KOD: # ============================================================================
+[15] KOD: # ============================================
+[16] KOD: # ============================================================================
 [17] KOD: # ============================================
-[18] KOD: # ============================================
+[18] MD : Mavi çubuklar histogramımız, kırmızı çizgi ise verimizin şeklini daha net göre
 [19] KOD: # ============================================
-[20] MD: Mavi çubuklar histogramımız,kırmızı çizgi ise verimizin şeklini daha net görebil
-[21] KOD: # ============================================
-[22] MD: Korelasyon matrisi nedir ve okuyalım.
-[23] KOD: # ============================================
-[24] MD: Okul Türüne Göre Hedef Değişken Boxplot grafiği,
-[25] MD: ANOVA Testi Ne Yapar?
-[26] KOD: # ============================================
-[27] MD: #1.grafik kolonlara göre eksik veri oranı
-[28] KOD: import os
-[29] MD: BÖLÜM 3
-[30] KOD: # ============================================
-[31] MD: Hipotez: ontest_skoru ile hedef_degisken arasında 0.99 gibi çok yüksek bir korel
-[32] KOD: # ============================================
-[33] MD: Hipotez: Tek tek ders notları yerine, öğrencinin genel akademik performansını te
-[34] MD: ## Eksik Veri Doldurma (AutoML - Iterative Imputer)
-[35] KOD: # İkili (binary, var/yok) sütunlar - 0/1 değer alacaklar
-[36] MD: Sütun tiplerine göre ayırdık.
-[37] MD: AutoML (IterativeImputer / MICE) ile Doldurma
-[38] KOD: import warnings
+[20] MD : **Korelasyon matrisi nedir ve okuyalım:**
+[21] KOD: import matplotlib.pyplot as plt
+[22] KOD: # ============================================
+[23] MD : Okul Türüne Göre Hedef Değişken Boxplot grafiği,
+[24] MD : **ANOVA Testi Ne Yapar?**
+[25] KOD: # ============================================
+[26] MD : #1.grafik kolonlara göre eksik veri oranı
+[27] MD : ## Confounder / Yorumlayıcı Analiz
+[28] MD : ## Okul Tipi ve Confounder Etkisi
+[29] KOD: # ============================================================================
+[30] MD : **Ne yaptım?**
+[31] MD : ## Aile Geliri Seviyesi ve Confounder Etkisi
+[32] KOD: # ============================================================================
+[33] MD : **Ne yaptım?**
+[34] MD : ##  Bursluluk ve Confounder Etkisi
+[35] KOD: # ============================================================================
+[36] MD : **Ne yaptım?**
+[37] MD : ## Ön Test Skoru Gruplarına Göre Hedef Başarı Dağılımı
+[38] KOD: # ============================================================================
+[39] MD : **Ne yaptım?**
+[40] MD : ## **Data Leakage**
+[41] MD : ## Ontest_Skoru Değişkeni - Data Leakage Kontrolü
+[42] KOD: import matplotlib.pyplot as plt
+[43] MD : ## `ontest_skoru`'nun Veri Setinden Çıkarılması
+[44] KOD: leakage_kolonlari = ['ontest_skoru']
+[45] MD : ## Sonucun Doğrulanması
+[46] KOD: print("Kalan sütunlar:")
+[47] MD : **Ne yaptım?** Çıkarma işleminden sonra `df`'in güncel boyutunu ve kalan
+[48] MD : ## **Eksik Veri Tamamlama**
+[49] KOD: import pandas as pd
+[50] KOD: # Orijinal (eksikli) veriyi, karşılaştırma yapabilmek için ayrı bir isimde sak
+[51] MD : ## Eksiklik Birliktelik Matrisi Bulguları ve Domain Kararı
+[52] KOD: import numpy as np
+[53] KOD: df_medyan = df_orijinal.copy()
+[54] KOD: from sklearn.linear_model import LinearRegression
+[55] KOD: # df_mod tüm eksik değer içeren sütunlar için dolduruluyor
+[56] KOD: df_ortalama = df_orijinal.copy()
+[57] KOD: from sklearn.impute import KNNImputer
+[58] KOD: df_grup = df_orijinal.copy()
+[59] KOD: print("1. Doldurma öncesi eksik veri sayıları:")
+[60] KOD: # ============================================
+[61] KOD: impute_output_df = pd.DataFrame(impute_output, columns=impute_input.columns, i
+[62] KOD: df_mice_rf = df.copy()
+[63] KOD: from sklearn.ensemble import ExtraTreesRegressor
+[64] KOD: import pandas as pd
+[65] KOD: fig, ax = plt.subplots(figsize=(10, 6))
+[66] MD : ## Görsel Karşılaştırma: Yöntemlere Göre Dağılım Histogramları
+[67] KOD: karsilastirma = pd.DataFrame({
+[68] MD : ## Karşılaştırma Tablosu (İstatistiksel)
+[69] KOD: import pandas as pd
+[70] KOD: import matplotlib.pyplot as plt
+[71] KOD: aciklamalar = {
+[72] KOD: import pandas as pd
+[73] KOD: import numpy as np
+[74] KOD: import pandas as pd
+[75] KOD: fig, ax = plt.subplots(figsize=(10, 6))
+[76] KOD: print("df_mod ile df_orijinal aynı mı:", df_mod['aile_geliri_seviyesi'].equals
+[77] MD : ## İmputation Yöntemi Kararı: MICE (ExtraTrees)
+[78] KOD: df[impute_cols] = df_mice_et[impute_cols]
+[79] MD : # Yeni Özniteliklerin Türetilmesi (Feature Engineering)
+[80] MD : Mevcut değişkenlerden **4 yeni öznitelik** türettim:
+[81] MD : **Öznitelik 1: Ebeveyn Eğitim Ortalaması**
+[82] KOD: # Öznitelik 1: ebeveyn_egitim_ort
+[83] MD : ## Yeni Öznitelik 1: Ebeveyn Eğitim Ortalaması
+[84] MD : **Öznitelik 2: Sayısal/Sözel Ders Dengesi**
+[85] KOD: # Öznitelik 2: sayisal_sozel_farki
+[86] MD : ## Yeni Öznitelik 2: Sayısal/Sözel Ders Dengesi
+[87] MD : **Öznitelik 3: Genel Not Ortalaması**
+[88] KOD: df['genel_not_ort'] = (df['turkce_not_ort'] + df['matematik_not_ort'] +
+[89] MD : ## Yeni Öznitelik 3: Genel Not Ortalaması
+[90] MD : **Öznitelik 4: Aile Anketi Eksiklik Göstergesi**
+[91] KOD: # Öznitelik 4: eksik_alan_sayisi
+[92] MD : ## Yeni Öznitelik 4: Aile Anketi Eksiklik Göstergesi
+[93] MD : ## Öznitelik Kararlarının Ölçülmesi
+[94] KOD: # ============================================================================
+[95] MD : ## Ölçümün Sonucu: Üç Karar
+[96] MD : ## ENCODING
+[97] MD : ## Label ve One-Hot Nedir ve Nasıl Çalışır?
+[98] MD : **One-Hot Encoding**
+[99] KOD: # ============================================
+[100] KOD: # Kontrol: hangi kolonlar olustu?
+[101] MD : **Ne yaptım?** `okul_tip` ve `kiminle_kaliyor` değişkenlerine One-Hot Encoding
+[102] MD : **Label Encoding**
+[103] KOD: print("okula_basladigi_yil kategorileri:", sorted(df['okula_basladigi_yil'].un
+[104] KOD: if df['okula_basladigi_yil'].dtype == 'object':
+[105] MD : **Ne yaptım?** `okula_basladigi_yil` ve `donem` sütunlarının Label Encoding
+[106] MD : ## `il` Sütununun Kontrolü
+[107] KOD: print(df['il'].dtype)
+[108] MD : **Ne yaptım?** `il` sütununun veri tipini ve aldığı benzersiz değerleri kontro
+[109] MD : **Temiz Hali**
+[110] KOD: print('ontest_skoru' in df.columns)
+[111] MD : **Encoding Sonrası Genel Kontrol**
+[112] KOD: kategorik_kalan = df.select_dtypes(include=['object', 'category']).columns.tol
+[113] MD : **Encoding Sonrası Genel Kontrol**
+[114] MD : # Öznitelik Seçimi (Feature Selection)
+[115] MD : **Adım 1: Korelasyon Analizi ile İlk Filtreleme**
+[116] KOD: korelasyonlar = df.drop(columns=['hedef_degisken']).corrwith(df['hedef_degiske
+[117] MD : **Kendime not:** abs() kullandım çünkü hem güçlü pozitif hem güçlü negatif kor
+[118] MD : **Adım 1: Korelasyon Analizi ile İlk Filtreleme**
+[119] MD : **RandomForest ile Feature Importance**
+[120] KOD: from sklearn.ensemble import RandomForestRegressor
+[121] MD : **Ne yaptım?** Bütün öznitelikleri kullanarak bir RandomForestRegressor eğitip
+[122] KOD: from sklearn.ensemble import RandomForestRegressor
+[123] MD : ## Düzeltme: Kimlik Sütunlarının Çıkarılması
+[124] KOD: kimlik_kolonlari = ['öğrenci_id', 'kayit_sira_no']
+[125] MD : **Ne yaptım?** `öğrenci_id` ve `kayit_sira_no` sütunlarını çıkarıp önem
+[126] MD : ##  Multicollinearity Kararı ve Nihai Öznitelik Seçimi
+[127] KOD: # Kimlik sütunları ve türetilmiş özelliklerin ham bileşenleri
+[128] MD : **Ne yaptım?** Türetilmiş öznitelikleri (`genel_not_ort`, `ebeveyn_egitim_ort`
+[129] MD : ## Nihai Öznitelik Seçimi (10 Öznitelik)
+[130] KOD: # ============================================================================
+[131] MD : ## Nihai Öznitelik Seçimi (10 Öznitelik)
+[132] MD : ## Bölüm 4
+[133] MD : # Modelleme
+[134] MD : Bu bölümde, seçtiğimiz 10 öznitelik ile hedef değişkeni tahmin edecek
+[135] MD : ## Adım 1: Train/Test Split (Yaklaşım 1: Rastgele Split) hatalı olan
+[136] MD : Çünkü rastgele böldük, donem'i göz ardı ettik.
+[137] KOD: # ============================================
+[138] MD : **NOT**
+[139] MD : **Ne yaptım?** Veriyi %80 eğitim, %20 test olacak şekilde ikiye ayırdım.
+[140] MD : **Bu arada** `Bu sayıların anlamı`:
+[141] MD : ## Yaklaşım 2: Kronolojik (Dönem Bazlı) Split" dönem 0+1 eğitim, dönem 2 test
+[142] KOD: # ============================================
+[143] MD : **Ne yaptım?** Veriyi rastgele değil `donem` bilgisine göre böldüm. Dönem 0
+[144] MD : ## Adım 2: Model Tanımlama ve Eğitim
+[145] KOD: # ============================================
+[146] MD : **Ne yaptım?** 4 farklı regresyon modelini (Linear Regression, Ridge,
+[147] MD : **Kod Açıklama**
+[148] MD : ## Adım 3: Model Performans Karşılaştırması (Yaklaşım 1)
+[149] KOD: # ============================================
+[150] MD : **Ne yaptım?** Her modelin test seti üzerindeki tahminlerini aldım ve
+[151] MD : **KOD AÇIKLAMA**
+[152] MD : ## Adım 3: Model Performans Karşılaştırması (Yaklaşım 2)
+[153] KOD: # ============================================
+[154] MD : **Ne yaptım?**
+[155] MD : **Beklediğim şey tam olarak olmadı, onu yazayım.**
+[156] MD : ## Model Performans Karşılaştırması: Görselleştirme
+[157] KOD: fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+[158] MD : **Ne yaptım?**
+[159] MD : ## Adım 4: GradientBoosting Hiperparametre Tuning (Yaklaşım 1)
+[160] KOD: # ============================================
+[161] MD : **Açıklama:** Buradaki CV RMSE (32.710) ile bir üstteki test RMSE'si (31.603)
+[162] MD : **Ne yaptım?**
+[163] MD : ## Adım 4: GradientBoosting Hiperparametre Tuning (Kronolojik/Grup Bazlı CV) (
+[164] KOD: # ============================================
+[165] MD : **cross-validation yaptık.**
+[166] MD : **Sonuçları yorumlayalım:**
+[167] MD : **Ne yaptım?**
+[168] MD : **Ne gördüm?**
+[169] MD : ## Adım 5: Optimize Edilmiş Modelin Test Setinde Değerlendirilmesi (Yaklaşım 1
+[170] KOD: en_iyi_gb_model = grid_search.best_estimator_
+[171] MD : **Açıklama:** Rastgele split'te tuning küçük ama gerçek bir kazanç sağladı.
+[172] MD : **Ne yaptım?**
+[173] MD : ## Adım 5: Optimize Edilmiş Modelin Test Setinde Değerlendirilmesi (Kronolojik
+[174] KOD: en_iyi_gb_model_kron = grid_search_kron.best_estimator_
+[175] MD : **Kronolojik split'te tuning daha da çok işe yaradı.**
+[176] MD : ## Nihai Sonuç ve Model Kararı
+[177] KOD: # ============================================================================
+[178] KOD: # ============================================================================
+[179] MD : ## Modeli Servise Hazırlama
+[180] KOD: # ============================================================================
+[181] MD : ### Karar: medyan doldurma
+[182] KOD: # ============================================================================
