@@ -1,7 +1,7 @@
 01_explore_data.ipynb - hucre ozeti
-Toplam 183 hucre
+Toplam 195 hucre
 ============================================================
-[0] KOD: import sqlite3
+[0] KOD: import pandas as pd
 [1] KOD: df_hedef = pd.read_sql('SELECT * FROM hedef', conn)
 [2] KOD: df_hedef['hedef_degisken'] = df_hedef['hedef_degisken'].str.replace(',', '.')
 [3] KOD: plt.figure(figsize=(8, 5))
@@ -100,8 +100,8 @@ Toplam 183 hucre
 [96] MD : ## ENCODING
 [97] MD : ## Label ve One-Hot Nedir ve Nasıl Çalışır?
 [98] MD : **One-Hot Encoding**
-[99] KOD: # ============================================
-[100] KOD: # Kontrol: hangi kolonlar olustu?
+[99] KOD: onehot_yeni_sutunlar = [c for c in df.columns if c.startswith('okul_tip_') or 
+[100] KOD: onehot_cols = ['okul_tip', 'kiminle_kaliyor']
 [101] MD : **Ne yaptım?** `okul_tip` ve `kiminle_kaliyor` değişkenlerine One-Hot Encoding
 [102] MD : **Label Encoding**
 [103] KOD: print("okula_basladigi_yil kategorileri:", sorted(df['okula_basladigi_yil'].un
@@ -132,55 +132,67 @@ Toplam 183 hucre
 [128] MD : **Ne yaptım?** Türetilmiş öznitelikleri (`genel_not_ort`, `ebeveyn_egitim_ort`
 [129] MD : ## Nihai Öznitelik Seçimi (10 Öznitelik)
 [130] KOD: # ============================================================================
-[131] MD : ## Nihai Öznitelik Seçimi (10 Öznitelik)
-[132] MD : ## Bölüm 4
-[133] MD : # Modelleme
-[134] MD : Bu bölümde, seçtiğimiz 10 öznitelik ile hedef değişkeni tahmin edecek
-[135] MD : ## Adım 1: Train/Test Split (Yaklaşım 1: Rastgele Split) hatalı olan
-[136] MD : Çünkü rastgele böldük, donem'i göz ardı ettik.
-[137] KOD: # ============================================
-[138] MD : **NOT**
-[139] MD : **Ne yaptım?** Veriyi %80 eğitim, %20 test olacak şekilde ikiye ayırdım.
-[140] MD : **Bu arada** `Bu sayıların anlamı`:
-[141] MD : ## Yaklaşım 2: Kronolojik (Dönem Bazlı) Split" dönem 0+1 eğitim, dönem 2 test
-[142] KOD: # ============================================
-[143] MD : **Ne yaptım?** Veriyi rastgele değil `donem` bilgisine göre böldüm. Dönem 0
-[144] MD : ## Adım 2: Model Tanımlama ve Eğitim
+[131] MD : ### SHAP ile Seçimi Doğrulama
+[132] KOD: # ============================================================================
+[133] MD : **Ne gördüm?**
+[134] MD : ## Nihai Öznitelik Seçimi (10 Öznitelik)
+[135] MD : ## Bölüm 4
+[136] MD : # Modelleme
+[137] MD : Bu bölümde, seçtiğimiz 10 öznitelik ile hedef değişkeni tahmin edecek
+[138] MD : ## Adım 1: Train/Test Split (Yaklaşım 1: Rastgele Split) hatalı olan
+[139] MD : Çünkü rastgele böldük, donem'i göz ardı ettik.
+[140] KOD: # ============================================
+[141] MD : **NOT**
+[142] MD : **Ne yaptım?** Veriyi %80 eğitim, %20 test olacak şekilde ikiye ayırdım.
+[143] MD : **Bu arada** `Bu sayıların anlamı`:
+[144] MD : ## Yaklaşım 2: Kronolojik (Dönem Bazlı) Split" dönem 0+1 eğitim, dönem 2 test
 [145] KOD: # ============================================
-[146] MD : **Ne yaptım?** 4 farklı regresyon modelini (Linear Regression, Ridge,
-[147] MD : **Kod Açıklama**
-[148] MD : ## Adım 3: Model Performans Karşılaştırması (Yaklaşım 1)
-[149] KOD: # ============================================
-[150] MD : **Ne yaptım?** Her modelin test seti üzerindeki tahminlerini aldım ve
-[151] MD : **KOD AÇIKLAMA**
-[152] MD : ## Adım 3: Model Performans Karşılaştırması (Yaklaşım 2)
-[153] KOD: # ============================================
-[154] MD : **Ne yaptım?**
-[155] MD : **Beklediğim şey tam olarak olmadı, onu yazayım.**
-[156] MD : ## Model Performans Karşılaştırması: Görselleştirme
-[157] KOD: fig, axes = plt.subplots(1, 2, figsize=(14, 5))
-[158] MD : **Ne yaptım?**
-[159] MD : ## Adım 4: GradientBoosting Hiperparametre Tuning (Yaklaşım 1)
-[160] KOD: # ============================================
-[161] MD : **Açıklama:** Buradaki CV RMSE (32.710) ile bir üstteki test RMSE'si (31.603)
-[162] MD : **Ne yaptım?**
-[163] MD : ## Adım 4: GradientBoosting Hiperparametre Tuning (Kronolojik/Grup Bazlı CV) (
-[164] KOD: # ============================================
-[165] MD : **cross-validation yaptık.**
-[166] MD : **Sonuçları yorumlayalım:**
-[167] MD : **Ne yaptım?**
-[168] MD : **Ne gördüm?**
-[169] MD : ## Adım 5: Optimize Edilmiş Modelin Test Setinde Değerlendirilmesi (Yaklaşım 1
-[170] KOD: en_iyi_gb_model = grid_search.best_estimator_
-[171] MD : **Açıklama:** Rastgele split'te tuning küçük ama gerçek bir kazanç sağladı.
-[172] MD : **Ne yaptım?**
-[173] MD : ## Adım 5: Optimize Edilmiş Modelin Test Setinde Değerlendirilmesi (Kronolojik
-[174] KOD: en_iyi_gb_model_kron = grid_search_kron.best_estimator_
-[175] MD : **Kronolojik split'te tuning daha da çok işe yaradı.**
-[176] MD : ## Nihai Sonuç ve Model Kararı
-[177] KOD: # ============================================================================
-[178] KOD: # ============================================================================
-[179] MD : ## Modeli Servise Hazırlama
+[146] MD : **Ne yaptım?** Veriyi rastgele değil `donem` bilgisine göre böldüm. Dönem 0
+[147] MD : ## Adım 2: Model Tanımlama ve Eğitim
+[148] KOD: # ============================================
+[149] MD : **Ne yaptım?** 4 farklı regresyon modelini (Linear Regression, Ridge,
+[150] MD : **Kod Açıklama**
+[151] MD : ## Adım 3: Model Performans Karşılaştırması (Yaklaşım 1)
+[152] KOD: # ============================================
+[153] MD : **Ne yaptım?** Her modelin test seti üzerindeki tahminlerini aldım ve
+[154] MD : **KOD AÇIKLAMA**
+[155] MD : ## Adım 3: Model Performans Karşılaştırması (Yaklaşım 2)
+[156] KOD: # ============================================
+[157] MD : **Ne yaptım?**
+[158] MD : **Beklediğim şey tam olarak olmadı, onu yazayım.**
+[159] MD : ## Model Performans Karşılaştırması: Görselleştirme
+[160] KOD: fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+[161] MD : **Ne yaptım?**
+[162] MD : ## Adım 4: GradientBoosting Hiperparametre Tuning (Yaklaşım 1)
+[163] KOD: # ============================================
+[164] MD : **Açıklama:** Buradaki CV RMSE (32.710) ile bir üstteki test RMSE'si (31.603)
+[165] MD : **Ne yaptım?**
+[166] MD : ## Adım 4: GradientBoosting Hiperparametre Tuning (Kronolojik/Grup Bazlı CV) (
+[167] KOD: # ============================================
+[168] MD : **cross-validation yaptık.**
+[169] MD : **Sonuçları yorumlayalım:**
+[170] MD : **Ne yaptım?**
+[171] MD : **Ne gördüm?**
+[172] MD : ## Adım 5: Optimize Edilmiş Modelin Test Setinde Değerlendirilmesi (Yaklaşım 1
+[173] KOD: en_iyi_gb_model = grid_search.best_estimator_
+[174] MD : **Açıklama:** Rastgele split'te tuning küçük ama gerçek bir kazanç sağladı.
+[175] MD : **Ne yaptım?**
+[176] MD : ## Adım 5: Optimize Edilmiş Modelin Test Setinde Değerlendirilmesi (Kronolojik
+[177] KOD: en_iyi_gb_model_kron = grid_search_kron.best_estimator_
+[178] MD : **Kronolojik split'te tuning daha da çok işe yaradı.**
+[179] MD : ## Ara Sonuç: Metriklere Göre Durum
 [180] KOD: # ============================================================================
-[181] MD : ### Karar: medyan doldurma
-[182] KOD: # ============================================================================
+[181] KOD: # ============================================================================
+[182] MD : ## Model Seçimini Yeniden Değerlendirme
+[183] KOD: # ============================================================================
+[184] MD : **Ne gördüm?**
+[185] MD : ## Model Açıklanabilirliği: SHAP
+[186] KOD: # ============================================================================
+[187] MD : **Ne gördüm?**
+[188] MD : ## Modeli Servise Hazırlama
+[189] KOD: # ============================================================================
+[190] MD : ### Karar: medyan doldurma
+[191] KOD: # ============================================================================
+[192] MD : ## Edge Cihazda Çalıştırma
+[193] KOD: # ============================================================================
+[194] MD : **Ne gördüm?**
