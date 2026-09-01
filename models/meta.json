@@ -1,7 +1,7 @@
 {
-  "model_adi": "RandomForest",
+  "model_adi": "ElasticNet",
   "surum": "1.0.0",
-  "egitim_tarihi": "2026-08-31",
+  "egitim_tarihi": "2026-09-01",
   "egitim_satir_sayisi": 999,
   "doldurma": "SimpleImputer(strategy=\"median\")",
   "oznitelik_sirasi": [
@@ -22,6 +22,48 @@
     "ebeveyn_egitim_ort": "(anne_egitim_seviyesi + baba_egitim_seviyesi) / 2",
     "sayisal_sozel_farki": "ort(matematik, fen) - ort(turkce, sosyal, y_dil, din)",
     "eksik_alan_sayisi": "aile anketindeki 7 alandan kaci bos birakilmis"
+  },
+  "oznitelik_araliklari": {
+    "genel_not_ort": [
+      22.166666664999997,
+      99.72222222166666
+    ],
+    "ebeveyn_egitim_ort": [
+      0.0,
+      4.0
+    ],
+    "sayisal_sozel_farki": [
+      -47.708333332500004,
+      23.666666669999998
+    ],
+    "aile_geliri_seviyesi": [
+      0.0,
+      4.0
+    ],
+    "anne_meslek(var/yok)": [
+      0.0,
+      1.0
+    ],
+    "kardes(var/yok)": [
+      0.0,
+      1.0
+    ],
+    "dogum_yil": [
+      1990.0,
+      2012.0
+    ],
+    "burslu": [
+      0.0,
+      1.0
+    ],
+    "okula_basladigi_yil": [
+      0.0,
+      2.0
+    ],
+    "eksik_alan_sayisi": [
+      0.0,
+      7.0
+    ]
   },
   "ders_kolonlari": [
     "turkce_not_ort",
@@ -46,11 +88,11 @@
     "2015-2016": 2
   },
   "dogrulanmis_metrikler": {
-    "aciklama": "kronolojik split, donem 0+1 ile egitim, donem 2 ile test. Asagidaki sayilar TAM OLARAK bu boru hattina ait (RandomForest + medyan doldurma).",
+    "aciklama": "kronolojik split, donem 0+1 ile egitim, donem 2 ile test. Asagidaki sayilar TAM OLARAK bu boru hattina ait (ElasticNet + medyan doldurma).",
     "test_ogrenci_sayisi": 108,
-    "rmse": 29.139,
-    "mae": 23.194,
-    "r2": 0.7934,
+    "rmse": 31.993,
+    "mae": 24.957,
+    "r2": 0.751,
     "aptal_referans_rmse": 64.112
   },
   "ortam": {
