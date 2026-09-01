@@ -3,3 +3,7 @@ __pycache__/
 .ipynb_checkpoints/
 .venv/
 venv/
+
+# MLflow yerel deneme veritabani, depoda tutulmuyor
+mlflow.db
+mlruns/

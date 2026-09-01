@@ -5,30 +5,44 @@ bir API.
 
 | Model | RMSE | MAE | R² |
 |---|---|---|---|
+| **ElasticNet (seçilen)** | **31.993** | **24.957** | **0.7510** |
 | RandomForest | 29.139 | 23.194 | 0.7934 |
 | Aptal referans (ortalamayı söyler) | 64.112 | 50.556 | -0.0001 |
 
 Kronolojik doğrulama: dönem 0+1 ile eğitim, dönem 2 ile test (108 öğrenci).
 
-## Nasıl Kullanılır
+En düşük RMSE'li modeli seçmedim. RandomForest 2.85 puan daha iyi ama iki
+testte kayboluyor:
 
-### 1. Servisi başlat
+- **Ekstrapolasyon:** eğitimde görülen `genel_not_ort` aralığının (22.2-99.7)
+  dışında RandomForest'ın tahmini hiç değişmiyor (0.00 puan), çünkü ağaç en uç
+  yaprağını tekrarlıyor. ElasticNet dışarıda da düzgün devam ediyor (72.26 puan).
+- **Ezberleme makası:** RandomForest eğitimde 24.35, testte 29.50 hata yapıyor
+  (+5.15). ElasticNet'te makas negatif (-2.29), yani ezberleme yok.
+
+Ayrıca ElasticNet 30.5 KB / 0.87 ms, RandomForest 4.3 MB / 61 ms. Edge cihazda
+çalışacak bir servis için bu fark belirleyici.
+
+## Servisi çalıştırma
+
+Model `models/` klasöründe hazır geliyor, notebook'u çalıştırmadan servis
+ayağa kalkıyor.
+
+### 1. Başlat
 
 ```bash
 docker compose up -d --build
 ```
 
-İlk kurulumda imaj indirileceği için birkaç dakika sürer, sonrasında saniyeler
-içinde açılır. Model `models/` klasöründe hazır geliyor, notebook'u çalıştırmanız
-gerekmiyor.
-
-### 2. Ayakta mı, kontrol et
+### 2. Sağlık kontrolü
 
 ```bash
 curl http://localhost:8000/health
 ```
 
-### 3. Tahmin al
+### 3. Tahmin
+
+Örnek istek:
 
 ```bash
 curl -X POST http://localhost:8000/predict \
@@ -43,62 +57,73 @@ curl -X POST http://localhost:8000/predict \
   }'
 ```
 
+Cevabı:
+
 ```json
 {
   "tahmin": 355.95,
   "guven_araligi": [320.23, 394.13],
-  "model_adi": "RandomForest",
+  "model_adi": "ElasticNet",
   "model_surumu": "1.0.0",
   "bos_birakilan_anket_alani": 0,
   "uyarilar": []
 }
 ```
 
-Tarayıcıdan denemek için: <http://localhost:8000/docs>
+Tarayıcıdan denemek için `/docs`, durdurmak için `docker compose down`.
 
-Durdurmak için: `docker compose down`
+### Girdi
 
-### Girdi hakkında bilinmesi gereken iki şey
+Servis ham alanları alıyor. Not ortalaması, ebeveyn eğitim ortalaması gibi
+türetilmiş değerleri kendisi hesaplıyor, dışarıdan beklemiyor. Böylece formül
+tek yerde duruyor ve eğitimle servis arasında fark oluşmuyor.
 
-**Ham alanlar gönderiliyor.** Not ortalaması, ebeveyn eğitim ortalaması gibi
-türetilmiş değerleri servis kendisi hesaplıyor, sizin göndermenize gerek yok.
-
-**Aile anketi alanları boş bırakılabilir.** `burslu`, `aile_geliri_seviyesi`,
-`kardes`, `anne_egitim_seviyesi`, `baba_egitim_seviyesi`, `anne_meslek`,
-`baba_meslek` alanlarını atlayabilirsiniz. Boşluk hata değil, modelin kullandığı
-bir bilgi. Ders notlarından ise en az biri zorunlu.
+Aile anketi alanları (`burslu`, `aile_geliri_seviyesi`, `kardes`,
+`anne_egitim_seviyesi`, `baba_egitim_seviyesi`, `anne_meslek`, `baba_meslek`)
+boş gelebilir. Boşluk hata değil, modelin kullandığı bir bilgi: anketi
+doldurmayan ailelerin öğrencileri ortalamanın anlamlı biçimde altında. Ders
+notlarından en az biri gerekiyor, hiç not yoksa geriye modelin ortalamayı
+söylemesi kalıyor.
 
 ## Notebook
 
-Analizin tamamı tek dosyada: `notebooks/01_explore_data.ipynb`.
+Analizin tamamı tek dosyada: `notebooks/01_explore_data.ipynb`. EDA, temizlik,
+öznitelik mühendisliği, modelleme ve modelin dışa aktarılması aynı akışta.
 
 ```bash
 pip install -r requirements.txt
 jupyter lab notebooks/01_explore_data.ipynb
 ```
 
-Baştan sona çalıştırmak 25-30 dakika sürüyor (çapraz doğrulamalar ve
-GridSearchCV). Son bölüm `models/model.joblib` ve `models/meta.json` dosyalarını
-yeniden üretiyor.
+Baştan sona çalışması 25-30 dakika sürüyor (çapraz doğrulamalar ve
+GridSearchCV). Son bölüm `models/model.joblib` ve `models/meta.json`
+dosyalarını yeniden üretiyor.
 
 ## Proje yapısı
 
 ```
-notebooks/01_explore_data.ipynb   EDA, temizlik, öznitelik mühendisliği,
-                                  modelleme, model dışa aktarma
-models/                           Eğitilmiş model + meta.json
+notebooks/01_explore_data.ipynb   analizin tamamı
+models/                           eğitilmiş model + meta.json
 api/                              FastAPI servisi ve Dockerfile
-docker-compose.yml                Servisi ayağa kaldırma
-data/raw/data.db                  Kaynak veri (SQLite)
+docker-compose.yml                servisi ayağa kaldırma
+data/raw/data.db                  kaynak veri (SQLite)
 ```
 
 ## Notlar
 
-- Sinyalin büyük kısmı tek bir öznitelikten geliyor (`genel_not_ort`,
-  RandomForest öneminin %82'si). Model esasen "notu yüksek olan öğrenci yüksek
+- Sinyalin büyük kısmı tek bir öznitelikten geliyor (`genel_not_ort`, SHAP
+  katkısının büyük çoğunluğu). Model esasen "notu yüksek olan öğrenci yüksek
   skor alır" diyor.
-- `guven_araligi`, ormandaki 300 ağacın %10-%90 aralığı. Modelin kendi
-  içindeki anlaşmazlığın ölçüsü, istatistiksel bir güven aralığı değil.
-- `cinsiyet` ve `il` modele girmiyor.
-- `requirements-api.txt` sürümleri sabit: `model.joblib` bir pickle, farklı
+- `guven_araligi`, doğrulanmış test hatasından türetilmiş sabit bant:
+  tahmin ± 1.2816 × RMSE, yaklaşık %80'lik aralık. İstatistiksel bir güven
+  aralığı değil. Her öğrenci için aynı genişlikte; öğrenciye özel belirsizliği
+  ekstrapolasyon uyarısı taşıyor.
+- `cinsiyet` ve `il` modele girmiyor. ElasticNet'in L1 cezası
+  `aile_geliri_seviyesi` dahil üç özniteliği tamamen sıfırlıyor, yani model
+  aile gelirini doğrudan kullanmıyor.
+- Öznitelik seçimi üç ölçütle doğrulandı: korelasyon, RandomForest önemi ve
+  SHAP. Açıklanabilirlik için de SHAP kullanılıyor.
+- `requirements-api.txt` sürümleri sabit. `model.joblib` bir pickle, farklı
   scikit-learn sürümünde düzgün yüklenmiyor.
+- Test kümesi 108 öğrenci. Modeller arası 1 puanlık farkları ayırt etmeye
+  yetmiyor.
