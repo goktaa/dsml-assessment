@@ -9,7 +9,6 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 import joblib
-import numpy as np
 from fastapi import FastAPI, HTTPException
 from schemas import OgrenciGirdi, TahminCevabi
 from sklearn.exceptions import InconsistentVersionWarning
@@ -84,13 +83,21 @@ def tahmin_et(girdi: OgrenciGirdi):
 
     tahmin = float(model.predict(X)[0])
 
-    # Aralık için ağaçların kendi tahminlerine bakıyorum. Ormanın çıktısı zaten
-    # bunların ortalaması; ne kadar ayrışıyorlarsa model o kadar kararsız.
-    # İstatistiksel bir güven aralığı değil.
-    doldurulmus = model.named_steps["doldur"].transform(X)
-    agac_tahminleri = np.array([a.predict(doldurulmus)[0]
-                                for a in model.named_steps["model"].estimators_])
-    alt, ust = np.percentile(agac_tahminleri, [10, 90])
+    # Aralığı önce ağaçların dağılımından üretiyordum. Nihai model ElasticNet
+    # olunca o yöntem çalışmaz hale geldi: doğrusal modelin içinde birbirinden
+    # ayrışan ağaçlar yok, tek bir denklem var. Eski kod burada estimators_
+    # alanını arayıp AttributeError veriyordu.
+    #
+    # Yerine doğrulanmış test hatasından sabit bir bant üretiyorum. 1.2816
+    # katsayısı normal dağılımda %80'lik aralığa denk geliyor, yani eski
+    # 10-90 persentil bandıyla aynı kapsama.
+    #
+    # Bilinen sınırı: bu bant her öğrenci için aynı genişlikte. Ağaç sürümü
+    # "bu öğrenci konusunda kararsızım" diyebiliyordu, bu diyemiyor. Öğrenciye
+    # özel belirsizliği aşağıdaki ekstrapolasyon uyarısı taşıyor.
+    rmse = float(meta["dogrulanmis_metrikler"]["rmse"])
+    yari_genislik = 1.2816 * rmse
+    alt, ust = tahmin - yari_genislik, tahmin + yari_genislik
 
     uyarilar = []
     bos_alan = sum(getattr(girdi, a) is None for a in
@@ -100,12 +107,24 @@ def tahmin_et(girdi: OgrenciGirdi):
     if bos_alan >= 4:
         uyarilar.append(f"Aile anketinin {bos_alan}/7 alanı boş, dayanak zayıf.")
 
-    # Eşiği modelin kendi hatasına bağladım. Sabit bir sayı koymak yanlıştı:
-    # hedefin std'si 64, normal bir öğrencide bile ağaçlar 70-80 puana yayılıyor.
-    esik = 4 * meta["dogrulanmis_metrikler"]["rmse"]
-    if ust - alt > esik:
-        uyarilar.append(f"Ağaçlar {ust - alt:.0f} puana yayılmış (eşik {esik:.0f}), "
-                        f"model kararsız.")
+    # Ekstrapolasyon uyarısı. Modeli zaten ekstrapolasyon davranışı yüzünden
+    # seçtim: ağaç modelleri eğitim aralığının dışında sabit cevap veriyordu,
+    # ElasticNet düzgün devam ediyor. Yine de tahminin gözlenmemiş bir bölgeden
+    # geldiğini söylemek gerekiyor, sessizce üretip geçmek doğru olmaz.
+    araliklar = meta.get("oznitelik_araliklari", {})
+    disarida = []
+    for ad, deger in zip(meta["oznitelik_sirasi"], X.iloc[0]):
+        sinir = araliklar.get(ad)
+        if sinir is None or deger is None:
+            continue
+        if deger < sinir[0] or deger > sinir[1]:
+            disarida.append(f"{ad}={deger:g} (eğitim aralığı "
+                            f"{sinir[0]:g}-{sinir[1]:g})")
+    if disarida:
+        uyarilar.append(
+            "Bu öğrenci eğitimde görülmemiş bir değer aralığında: "
+            + "; ".join(disarida)
+            + ". Tahmin ekstrapolasyondur, dikkatli yorumlanmalı.")
     if durum["surum_uyarilari"]:
         uyarilar.append("Model farklı bir kütüphane sürümüyle üretilmiş.")
 
